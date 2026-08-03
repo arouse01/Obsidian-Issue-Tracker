@@ -60,3 +60,8 @@ export interface TimeSession {
 	start: string;
 	end: string | null;  // null while session is active
 }
+
+export interface TimeSummary {
+	projectPath: string;
+	totalMinutes: number;
+}

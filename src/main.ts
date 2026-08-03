@@ -336,7 +336,7 @@ export default class IssueTracker extends Plugin {
 
 		this.registerView(
 			"time-dashboard",
-			(leaf) => new TimeDashboardView(
+			leaf => new TimeDashboardView(
 				leaf,
 				this.timeTracker,
 				this.projectManager
@@ -594,7 +594,11 @@ ${request.issue.description}
 		)[0];
 
 		if (!leaf) {
-			leaf = workspace.getLeaf("tab");
+			leaf = workspace.getRightLeaf(false);
+
+			if (!leaf) {
+				return;
+			}
 
 			await leaf.setViewState({
 				type: "time-dashboard",

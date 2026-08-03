@@ -12,16 +12,109 @@ If your plugin does not need CSS, delete this file.
 	gap: 12px;
 }
 
-	.issue-form label {
-		font-weight: 600;
-		margin-bottom: 4px;
-	}
+.issue-form label {
+	font-weight: 600;
+	margin-bottom: 4px;
+}
 
-	.issue-form input,
-	.issue-form textarea,
-	.issue-form select {
-		width: 100%;
-	}
+.issue-form input,
+.issue-form textarea,
+.issue-form select {
+	width: 100%;
+}
 .wide-setting-input {
 	width: 100%;
+}
+
+/*.time-dashboard table {
+	width: 100%;
+}*/
+/*.time-dashboard td {
+	padding: 0 6px;
+	text-align: center;
+}*/
+
+.time-dashboard th,.time-dashboard td {
+/*	padding: 0px 8px;*/
+	border-bottom: 1px solid var(--background-modifier-border);
+	text-align: center;
+	vertical-align: middle;
+	font-size: 12px;
+}
+
+.time-dashboard th {
+	font-weight: 600;
+	background-color: var(--background-secondary);
+}
+
+
+.time-dashboard tbody tr:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.time-dashboard-centered {
+	text-align: center;
+}
+
+.summary-controls {
+	display: flex;
+	align-items: center;
+	gap: 20px 8px;
+	justify-content: center;
+}
+.summary-period-select {
+	height: var(--input-height);
+	width: 80px;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+	background-repeat: no-repeat;
+	background-position: right 6px center;
+}
+.time-dashboard .timer-section {
+	margin-bottom: 20px;
+}
+
+.time-dashboard button {
+	padding-top: 0px;
+	padding-bottom: 0px;
+	font-size: 12px;
+	height: 24px;
+}
+
+.fixed-width-date-range {
+	width: 150px;
+	text-align: center;
+}
+
+.time-dashboard .summary-controls {
+	padding-bottom: 8px;
+}
+.time-dashboard .summary-controls button {
+	height: 30px;
+}
+
+.time-dashboard .summary-controls .arrow-button {
+	width: 30px;
+}
+
+.time-dashboard .summary-section {
+/*	margin-top: 20px;*/
+	font-size: 12px;
+}
+
+.time-dashboard table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.time-dashboard .summary-section table {
+	padding: 0px 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	text-align: center;
+	height: 30px;
+}
+
+.time-dashboard tbody tr {
+	height: 30px;
+	vertical-align: middle;
 }

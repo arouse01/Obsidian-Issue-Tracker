@@ -16,7 +16,8 @@ import {
 	CreateIssueRequest,
 	IssueModalOptions,
 	PRIORITIES,
-	TimeSession
+	TimeSession,
+	TimeSummary
 } from "./types";
 import {
 	formatIssueID,
@@ -126,7 +127,7 @@ export class TimeTracker extends Events {
 	): Promise<void> {
 		const path = this.getTimeLogPath();
 		const file = this.app.vault.getAbstractFileByPath(path);
-		console.log(file);
+		//console.log(file);
 		const timeData = JSON.stringify(sessions)
 
 		if (file && (file instanceof TFile)) {
@@ -156,4 +157,79 @@ export class TimeTracker extends Events {
 		
 
 	}
+
+	async getTimeSummary(
+		rangeStart: Date,
+		rangeEnd: Date
+	): Promise<TimeSummary[]> {
+		// Get summary of time worked between start and end for all projects
+		const sessions = await this.loadSessions();
+
+		const activeProjects = this.projectManager.getActiveProjects();
+
+		// initialize the summary table
+		const summaryArray = new Map<string, number>();
+		// initialize the active project rows
+		for (const project of activeProjects) {
+			summaryArray.set(project.file.path, 0);
+		}
+
+		for (const session of sessions) {
+			const sessionStart = this.roundToNearest15(new Date(session.start), true);
+
+			const sessionEnd = session.end
+				? this.roundToNearest15(new Date(session.end), false)
+				: this.roundToNearest15(new Date(), false);
+
+			// Check if session overlaps start or end, and just grab part that is within range
+			if (
+				sessionStart >= rangeEnd ||
+				sessionEnd <= rangeStart
+			) {
+				continue;  // ignore any sessions that start after or end before the target range
+			}
+
+			const effectiveStart =
+				sessionStart > rangeStart
+					? sessionStart
+					: rangeStart;
+			const effectiveEnd =
+				sessionEnd < rangeEnd ? sessionEnd : rangeEnd;
+
+			const durationMs = effectiveEnd.getTime() - effectiveStart.getTime();
+
+			const durationMinutes = Math.round(durationMs / (1000 * 60));
+
+			const currentTotal = summaryArray.get(session.projectPath) ?? 0;
+
+			summaryArray.set(
+				session.projectPath,
+				currentTotal + durationMinutes
+			);
+
+		}
+
+		const results: TimeSummary[] = [];
+
+		for (const [projectPath, totalMinutes] of summaryArray) {
+			results.push({
+				projectPath,
+				totalMinutes
+			});
+		}
+
+		return results;
+
+	}
+
+	private roundToNearest15(date: Date, start: boolean): Date {
+		const msInterval = 15 * 60 * 1000; // 15 minutes in milliseconds
+		if (start) {
+			return new Date(Math.floor(date.getTime() / msInterval) * msInterval);
+		} else {
+			return new Date(Math.ceil(date.getTime() / msInterval) * msInterval);
+		}
+		
+	}
+	
 }
