@@ -1,0 +1,27 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+.issue-form {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+	.issue-form label {
+		font-weight: 600;
+		margin-bottom: 4px;
+	}
+
+	.issue-form input,
+	.issue-form textarea,
+	.issue-form select {
+		width: 100%;
+	}
+.wide-setting-input {
+	width: 100%;
+}
