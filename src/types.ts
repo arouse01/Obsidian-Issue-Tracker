@@ -65,3 +65,12 @@ export interface TimeSummary {
 	projectPath: string;
 	totalMinutes: number;
 }
+
+export interface SessionContext {
+	mode: SessionAction;
+	projectPath: string;
+	sessionStart?: string;
+	onSubmit: (timestamp: Date) => Promise<void>;
+}
+
+export type SessionAction = "start" | "stop";

@@ -16,6 +16,7 @@ import {
 	CreateIssueRequest,
 	IssueModalOptions,
 	PRIORITIES,
+	SessionContext,
 	TimeSession,
 	TimeSummary
 } from "./types";
@@ -36,7 +37,8 @@ export class TimeTracker extends Events {
 
 	async startProjectSession(
 		project: ProjectInfo,
-		additive: boolean = false
+		timestamp: Date = new Date(),
+		additive: boolean = true
 	): Promise<void> {
 		/*
 		- Get current timestamp
@@ -44,17 +46,17 @@ export class TimeTracker extends Events {
 			- if so, close it first with timestamp
 		- Add entry to json file with project and timestamp
 		*/
-		const currTS = new Date().toISOString();
+		const startTS = timestamp.toISOString();
 		let sessions = await this.loadSessions();
 		const activeSessions = this.findActiveSessions(sessions);
 		if (!additive && activeSessions.length > 0) {
 			// if additive is false, it means we want to close all active sessions before starting a new one
-			sessions = this.stopSessions(sessions, currTS);
+			sessions = this.stopSessions(sessions, startTS);
 		}
 		sessions.push({
 			id: crypto.randomUUID(),
 			projectPath: project.file.path,
-			start: currTS,
+			start: startTS,
 			end: null
 		});
 
@@ -63,7 +65,8 @@ export class TimeTracker extends Events {
 	}
 
 	async stopProjectSession(
-		project: ProjectInfo
+		project: ProjectInfo,
+		timestamp: Date = new Date()
 	): Promise<void> {
 		/*
 		- Get current timestamp
@@ -71,7 +74,7 @@ export class TimeTracker extends Events {
 			- if so, close it first with timestamp
 		- Add entry to json file with project and timestamp
 		*/
-		const currTS = new Date().toISOString();
+		const stopTS = timestamp.toISOString();
 		let sessions = await this.loadSessions();
 		const activeSessions = this.findActiveSessions(sessions);
 		const projectSessions = activeSessions.filter(
@@ -81,7 +84,7 @@ export class TimeTracker extends Events {
 			return; // that project has no active sessions, so no need to do anything
 		}
 
-		sessions = this.stopSessions(sessions, currTS, project.file.path);
+		sessions = this.stopSessions(sessions, stopTS, project.file.path);
 
 
 		await this.saveSessions(sessions);
@@ -147,15 +150,12 @@ export class TimeTracker extends Events {
 		return sessions.filter(s => s.end === null)  // return any sessions with an end of null, meaning they're open
 	}
 
-	async getActiveProjectPaths(): Promise<Set<string>> {
+
+	async getActiveSessions(): Promise<TimeSession[]> {
+
 		const sessions = await this.loadSessions();
-
-		return new Set(
-			this.findActiveSessions(sessions)
-				.map(session => session.projectPath)
-		);
+		return this.findActiveSessions(sessions)
 		
-
 	}
 
 	async getTimeSummary(
@@ -175,11 +175,11 @@ export class TimeTracker extends Events {
 		}
 
 		for (const session of sessions) {
-			const sessionStart = this.roundToNearest15(new Date(session.start), true);
+			const sessionStart = this.roundToNearest(new Date(session.start), 15, true);
 
 			const sessionEnd = session.end
-				? this.roundToNearest15(new Date(session.end), false)
-				: this.roundToNearest15(new Date(), false);
+				? this.roundToNearest(new Date(session.end), 15, false)
+				: this.roundToNearest(new Date(), 1, false);
 
 			// Check if session overlaps start or end, and just grab part that is within range
 			if (
@@ -222,8 +222,8 @@ export class TimeTracker extends Events {
 
 	}
 
-	private roundToNearest15(date: Date, start: boolean): Date {
-		const msInterval = 15 * 60 * 1000; // 15 minutes in milliseconds
+	private roundToNearest(date: Date, nearest: number = 15, start: boolean): Date {
+		const msInterval = nearest * 60 * 1000; // 15 minutes in milliseconds
 		if (start) {
 			return new Date(Math.floor(date.getTime() / msInterval) * msInterval);
 		} else {
@@ -233,3 +233,5 @@ export class TimeTracker extends Events {
 	}
 	
 }
+
+
