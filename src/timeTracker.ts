@@ -18,7 +18,8 @@ import {
 	PRIORITIES,
 	SessionContext,
 	TimeSession,
-	TimeSummary
+	TimeSummary,
+	ClientTimeSummary
 } from "./types";
 import {
 	formatIssueID,
@@ -163,42 +164,49 @@ export class TimeTracker extends Events {
 		rangeEnd: Date
 	): Promise<TimeSummary[]> {
 		// Get summary of time worked between start and end for all projects
-		const sessions = await this.loadSessions();
-
+		
 		const activeProjects = this.projectManager.getActiveProjects();
 
 		// initialize the summary table
 		const summaryArray = new Map<string, number>();
+
 		// initialize the active project rows
 		for (const project of activeProjects) {
 			summaryArray.set(project.file.path, 0);
 		}
 
+		const sessions = await this.loadSessions();
+
 		for (const session of sessions) {
-			const sessionStart = this.roundToNearest(new Date(session.start), 15, true);
 
+			const rawStart = new Date(session.start);
+			const rawEnd = session.end ? new Date(session.end) : new Date();
+
+			const sessionStart = this.roundToNearest(rawStart, 15, true);
 			const sessionEnd = session.end
-				? this.roundToNearest(new Date(session.end), 15, false)
-				: this.roundToNearest(new Date(), 1, false);
+				? this.roundToNearest(rawEnd, 15, false)
+				: this.roundToNearest(rawEnd, 1, false);
 
-			// Check if session overlaps start or end, and just grab part that is within range
-			if (
-				sessionStart >= rangeEnd ||
-				sessionEnd <= rangeStart
-			) {
+			if ( sessionStart >= rangeEnd || sessionEnd <= rangeStart ) {
 				continue;  // ignore any sessions that start after or end before the target range
 			}
 
+			if (
+				session.end &&
+				rawEnd.getTime() - rawStart.getTime() < 2 * 60 * 1000  // total time less than 2 minutes
+			) {
+				continue  // filter out sessions less than 2 minutes, which are most likely errors
+			} 
+
 			const effectiveStart =
-				sessionStart > rangeStart
-					? sessionStart
-					: rangeStart;
+				sessionStart > rangeStart ? sessionStart : rangeStart;
+
 			const effectiveEnd =
 				sessionEnd < rangeEnd ? sessionEnd : rangeEnd;
 
-			const durationMs = effectiveEnd.getTime() - effectiveStart.getTime();
-
-			const durationMinutes = Math.round(durationMs / (1000 * 60));
+			const durationMinutes = Math.round(
+				(effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60)
+			);
 
 			const currentTotal = summaryArray.get(session.projectPath) ?? 0;
 
@@ -206,7 +214,6 @@ export class TimeTracker extends Events {
 				session.projectPath,
 				currentTotal + durationMinutes
 			);
-
 		}
 
 		const results: TimeSummary[] = [];
@@ -214,6 +221,88 @@ export class TimeTracker extends Events {
 		for (const [projectPath, totalMinutes] of summaryArray) {
 			results.push({
 				projectPath,
+				totalMinutes
+			});
+		}
+
+		return results;
+
+	}
+
+	async getTimeSummaryByClient(
+		rangeStart: Date,
+		rangeEnd: Date
+	): Promise<ClientTimeSummary[]> {
+		// Get summary of time worked between start and end for all projects
+
+		const projects = this.projectManager.getProjects();
+		const clients = new Set(
+			projects.map(project => project.client.replace(/^\[\[|\]\]$/g, ""))
+		)
+		const clientByProjectPath = new Map(
+			projects.map(project => [
+				project.file.path,
+				project.client.replace(/^\[\[|\]\]$/g, "")
+			])
+		)
+
+		// initialize the summary table
+		const summaryArray = new Map<string, number>();
+
+		// initialize the active project rows
+		for (const client of clients) {
+			summaryArray.set(client, 0);
+		}
+
+		const sessions = await this.loadSessions();
+
+		for (const session of sessions) {
+
+			const rawStart = new Date(session.start);
+			const rawEnd = session.end ? new Date(session.end) : new Date();
+
+			const sessionStart = this.roundToNearest(rawStart, 15, true);
+			const sessionEnd = session.end
+				? this.roundToNearest(rawEnd, 15, false)
+				: this.roundToNearest(rawEnd, 1, false);
+
+			if (sessionStart >= rangeEnd || sessionEnd <= rangeStart) {
+				continue;  // ignore any sessions that start after or end before the target range
+			}
+
+			if (
+				session.end &&
+				rawEnd.getTime() - rawStart.getTime() < 2 * 60 * 1000  // total time less than 2 minutes
+			) {
+				continue  // filter out sessions less than 2 minutes, which are most likely errors
+			}
+
+			const effectiveStart =
+				sessionStart > rangeStart ? sessionStart : rangeStart;
+
+			const effectiveEnd =
+				sessionEnd < rangeEnd ? sessionEnd : rangeEnd;
+
+			const durationMinutes = Math.round(
+				(effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60)
+			);
+			let currClient = clientByProjectPath.get(session.projectPath);
+			if (!currClient) {
+				currClient = '(none)';  // if no client entered, default to "none"
+			}
+			const currentTotal = summaryArray.get(currClient) ?? 0;
+
+			summaryArray.set(
+				currClient,
+				currentTotal + durationMinutes
+			);
+		}
+
+		const results: ClientTimeSummary[] = [];
+
+		for (const [client, totalMinutes] of summaryArray) {
+			results.push({
+				client,
 				totalMinutes
 			});
 		}

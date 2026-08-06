@@ -21,7 +21,8 @@ import {
 } from "./types";
 import {
 	formatIssueID,
-	formatTimestamp
+	formatTimestamp,
+	formatMinutes
 } from './utils';
 import { TimeTracker } from './timeTracker';
 import { TimeModal } from './timeModal';
@@ -198,6 +199,7 @@ export class TimeDashboardView extends ItemView {
 			const statusCell = row.createEl('td');
 			const projectCell = row.createEl('td');
 			const actionCell = row.createEl('td');
+			const timeCell = row.createEl('td');
 
 			statusCell.addClass("time-dashboard-centered");
 			const activeSession = activeSessionMap.get(project.file.path);
@@ -297,7 +299,7 @@ export class TimeDashboardView extends ItemView {
 			}
 
 
-			const durationText = this.formatMinutes(timeSum.totalMinutes);
+			const durationText = formatMinutes(timeSum.totalMinutes);
 			totalCell.setText(durationText)
 
 		}
@@ -320,10 +322,6 @@ export class TimeDashboardView extends ItemView {
 		return { start, end };
 	}
 
-	private formatMinutes(totalMinutes: number): string {
-		const hours = Math.floor(totalMinutes / 60).toString().padStart(2,'0');
-		const minutes = (totalMinutes % 60).toString().padStart(2, '0');
-		return `${hours}:${minutes}`
-	}
+	
 }
 

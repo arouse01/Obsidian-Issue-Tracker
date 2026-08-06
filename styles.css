@@ -125,3 +125,66 @@ If your plugin does not need CSS, delete this file.
 	margin-bottom: 6px;
 	text-align: center;
 }
+
+.project-controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.project-controls .new-project-button {
+	margin-left: auto;
+}
+
+.project-dashboard th, .project-dashboard td {
+	padding: 2px 8px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	text-align: center;
+	vertical-align: middle;
+	font-size: 14px;
+
+}
+
+.project-dashboard th {
+	font-weight: 600;
+	background-color: var(--background-secondary);
+}
+
+
+.project-dashboard tbody tr:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+button.project-dashboard-button {
+	background: none;
+	border: none;
+	box-shadow: none;
+	padding: 0;
+	color: var(--link-color);
+	cursor: pointer;
+	font: inherit;
+}
+
+button.project-dashboard-button:hover {
+	color: var(--link-color-hover);
+	text-decoration: underline;
+}
+
+button.project-dashboard-button.button-selected {
+	font-weight: 600;
+}
+
+.project-table {
+/*	width: 100%;*/
+	width: fit-content;
+	margin: 0 auto;
+}
+.project-table thead tr:first-child th {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	font-weight: 500;
+	border-bottom: none;
+}
+.project-table thead tr:nth-child(2) th {
+	font-weight: 600;
+}

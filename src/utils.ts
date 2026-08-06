@@ -12,10 +12,16 @@ export function formatTimestamp(date: Date = new Date()): string {
 		String(date.getMonth() + 1).padStart(2, "0"),
 		String(date.getDate()).padStart(2, "0")
 	].join("-") + "T" +
-		[
-			String(date.getHours()).padStart(2, "0"),
-			String(date.getMinutes()).padStart(2, "0"),
-			String(date.getSeconds()).padStart(2, "0")
-		].join(":");
+	[
+		String(date.getHours()).padStart(2, "0"),
+		String(date.getMinutes()).padStart(2, "0"),
+		String(date.getSeconds()).padStart(2, "0")
+	].join(":");
+		
+}
 
+export function formatMinutes(totalMinutes: number): string {
+	const hours = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+	const minutes = (totalMinutes % 60).toString().padStart(2, '0');
+	return `${hours}:${minutes}`
 }

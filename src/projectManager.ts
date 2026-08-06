@@ -24,7 +24,8 @@ export class MyProjectManager {
 			return {
 				file: file,
 				name: file.basename,
-				status: this.getFrontmatterString(file, "Project Status")
+				status: this.getFrontmatterString(file, "Project Status"),
+				client: this.getFrontmatterString(file, "Primary")
 			};
 
 		})
@@ -36,9 +37,14 @@ export class MyProjectManager {
 	getActiveProjects(): ProjectInfo[] {
 		return this.getProjects().filter(project =>
 			project.status === "Active"
-		);
+		);	
+	}
 
-		
+	getArchivedProjects(): ProjectInfo[] {
+		return this.getProjects().filter(project =>
+			project.status === "Archived" ||
+			project.status === "Inactive"
+		);
 	}
 
 	findProjectByPath(path: string | null): ProjectInfo | null {

@@ -30,6 +30,9 @@ import {
 import {
 	TimeDashboardView
 } from './timeDashboard';
+import {
+	ProjectDashboardView
+} from './projectDashboard'
 
 
 
@@ -343,13 +346,30 @@ export default class IssueTracker extends Plugin {
 			)
 		);
 
+		this.registerView(
+			"project-dashboard",
+			leaf => new ProjectDashboardView(
+				leaf,
+				this.timeTracker,
+				this.projectManager
+			)
+		);
+
+		this.addRibbonIcon(
+			'folder-open-dot',
+			'Open project dashboard',
+			async (_evt: MouseEvent) => {
+				// Called when the user clicks the icon.
+				await this.activateProjectDashboard();
+			});
+
 		// Add the time tracking dashboard to the left 
 		this.addRibbonIcon(
 			'clock',
 			'Open time dashboard',
 			async (_evt: MouseEvent) => {
 				// Called when the user clicks the icon.
-				await this.activateDashboard();
+				await this.activateTimeDashboard();
 		});
 		
 
@@ -585,7 +605,31 @@ ${request.issue.description}
 		return path.trim();
 	}
 
-	async activateDashboard(): Promise<void> {
+	async activateProjectDashboard(): Promise<void> {
+
+		const { workspace } = this.app;
+
+		let leaf = workspace.getLeavesOfType(
+			"project-dashboard"
+		)[0];
+
+		if (!leaf) {
+			leaf = workspace.getLeaf("tab");
+
+			if (!leaf) {
+				return;
+			}
+
+			await leaf.setViewState({
+				type: "project-dashboard",
+				active: true
+			});
+		}
+
+		await workspace.revealLeaf(leaf);
+	}
+
+	async activateTimeDashboard(): Promise<void> {
 
 		const { workspace } = this.app;
 

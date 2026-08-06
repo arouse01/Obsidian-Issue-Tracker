@@ -26,6 +26,8 @@ export interface ProjectInfo {
 	file: TFile;
 	name: string;
 	status: string;
+	id?: string;
+	client: string;
 }
 
 export interface CreateIssueRequest {
@@ -63,6 +65,11 @@ export interface TimeSession {
 
 export interface TimeSummary {
 	projectPath: string;
+	totalMinutes: number;
+}
+
+export interface ClientTimeSummary {
+	client: string;
 	totalMinutes: number;
 }
 
